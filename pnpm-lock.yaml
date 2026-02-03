@@ -20,6 +20,9 @@ importers:
       nuxt:
         specifier: ^3.14.0
         version: 3.21.0(@parcel/watcher@2.5.6)(@vue/compiler-sfc@3.5.27)(cac@6.7.14)(db0@0.3.4)(ioredis@5.9.2)(magicast@0.5.1)(rolldown@1.0.0-beta.57)(rollup@4.57.1)(terser@5.46.0)(vite@7.3.1(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(yaml@2.8.2)
+      unagent:
+        specifier: https://pkg.pr.new/onmax/unagent@1c545eb
+        version: https://pkg.pr.new/onmax/unagent@1c545eb(@cloudflare/sandbox@0.7.0)(@vercel/sandbox@1.4.1)(unstorage@1.17.4(db0@0.3.4)(ioredis@5.9.2))
 
 packages:
 
@@ -3306,6 +3309,21 @@ packages:
 
   ultrahtml@1.6.0:
     resolution: {integrity: sha512-R9fBn90VTJrqqLDwyMph+HGne8eqY1iPfYhPzZrvKpIfwkWZbcYlfpsb8B9dTvBfpy1/hqAD7Wi8EKfP9e8zdw==}
+
+  unagent@https://pkg.pr.new/onmax/unagent@1c545eb:
+    resolution: {tarball: https://pkg.pr.new/onmax/unagent@1c545eb}
+    version: 0.0.4
+    peerDependencies:
+      '@cloudflare/sandbox': '>=0.1.0'
+      '@vercel/sandbox': '>=0.1.0'
+      unstorage: '>=1.10.0'
+    peerDependenciesMeta:
+      '@cloudflare/sandbox':
+        optional: true
+      '@vercel/sandbox':
+        optional: true
+      unstorage:
+        optional: true
 
   unconfig-core@7.4.2:
     resolution: {integrity: sha512-VgPCvLWugINbXvMQDf8Jh0mlbvNjNC6eSUziHsBCMpxR05OPrNrvDnyatdMjRgcHaaNsCqz+wjNXxNw1kRLHUg==}
@@ -7158,6 +7176,17 @@ snapshots:
   ufo@1.6.3: {}
 
   ultrahtml@1.6.0: {}
+
+  unagent@https://pkg.pr.new/onmax/unagent@1c545eb(@cloudflare/sandbox@0.7.0)(@vercel/sandbox@1.4.1)(unstorage@1.17.4(db0@0.3.4)(ioredis@5.9.2)):
+    dependencies:
+      hookable: 5.5.3
+      pathe: 2.0.3
+      std-env: 3.10.0
+      yaml: 2.8.2
+    optionalDependencies:
+      '@cloudflare/sandbox': 0.7.0
+      '@vercel/sandbox': 1.4.1
+      unstorage: 1.17.4(db0@0.3.4)(ioredis@5.9.2)
 
   unconfig-core@7.4.2:
     dependencies:

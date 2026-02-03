@@ -12,6 +12,7 @@
     "nuxt": "^3.14.0",
     "@nuxthub/core": "https://pkg.pr.new/@nuxthub/core@ac1561b",
     "@cloudflare/sandbox": "^0.7.0",
-    "@vercel/sandbox": "^1.0.0"
+    "@vercel/sandbox": "^1.0.0",
+    "unagent": "https://pkg.pr.new/onmax/unagent@1c545eb"
   }
 }
