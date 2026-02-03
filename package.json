@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "nuxt": "^3.14.0",
-    "@nuxthub/core": "link:../../nuxt/hub",
+    "@nuxthub/core": "https://pkg.pr.new/@nuxthub/core@ac1561b",
     "@cloudflare/sandbox": "^0.7.0",
     "@vercel/sandbox": "^1.0.0"
   }
