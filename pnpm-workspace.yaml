@@ -1,2 +1,5 @@
 packages:
   - "."
+
+patchedDependencies:
+  '@nuxthub/core@0.10.5': patches/@nuxthub__core@0.10.5.patch
