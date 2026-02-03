@@ -25,9 +25,8 @@ pnpm deploy:cloudflare
 
 ```ts
 // server/api/sandbox.get.ts
-export default defineEventHandler(async (event) => {
-  const env = event.context.cloudflare?.env
-  const sandbox = await hubSandbox({ namespace: env?.SANDBOX })
+export default defineEventHandler(async () => {
+  const sandbox = hubSandbox()
 
   const result = await sandbox.exec('echo', ['hello'])
   await sandbox.writeFile('/tmp/test.txt', 'content')

@@ -1,6 +1,5 @@
-export default defineEventHandler(async (event) => {
-  const env = event.context.cloudflare?.env
-  const sandbox = await hubSandbox({ namespace: env?.SANDBOX })
+export default defineEventHandler(async () => {
+  const sandbox = hubSandbox()
 
   const result = await sandbox.exec('echo', ['Hello from sandbox!'])
   await sandbox.writeFile('/tmp/test.txt', 'NuxtHub Sandbox works!')
