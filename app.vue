@@ -121,18 +121,6 @@ onMounted(async () => {
             <div class="text-xs uppercase text-gray-400">Timestamp</div>
             <div class="text-sm font-medium">{{ status?.timestamp ?? 'n/a' }}</div>
           </div>
-          <div class="md:col-span-2">
-            <div class="text-xs uppercase text-gray-400">Available</div>
-            <pre class="text-xs bg-gray-950 text-gray-100 rounded-md p-3 overflow-x-auto">{{ format(status?.available) }}</pre>
-          </div>
-          <div class="md:col-span-2">
-            <div class="text-xs uppercase text-gray-400">Resolved</div>
-            <pre class="text-xs bg-gray-950 text-gray-100 rounded-md p-3 overflow-x-auto">{{ format(status?.resolved) }}</pre>
-          </div>
-          <div class="md:col-span-2">
-            <div class="text-xs uppercase text-gray-400">Detection</div>
-            <pre class="text-xs bg-gray-950 text-gray-100 rounded-md p-3 overflow-x-auto">{{ format(status?.detection) }}</pre>
-          </div>
         </div>
       </UCard>
 
