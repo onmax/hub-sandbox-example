@@ -1,5 +1,5 @@
 export default defineEventHandler(async () => {
-  const sandbox = hubSandbox()
+  const sandbox = await hubSandbox()
 
   const result = await sandbox.exec('echo', ['Hello from sandbox!'])
   await sandbox.writeFile('/tmp/test.txt', 'NuxtHub Sandbox works!')

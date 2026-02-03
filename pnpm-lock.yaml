@@ -12,8 +12,8 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0
       '@nuxthub/core':
-        specifier: https://pkg.pr.new/@nuxthub/core@ac1561b
-        version: https://pkg.pr.new/@nuxthub/core@ac1561b(@cloudflare/sandbox@0.7.0)(@vercel/sandbox@1.4.1)(db0@0.3.4)(ioredis@5.9.2)(magicast@0.5.1)
+        specifier: https://pkg.pr.new/@nuxthub/core@d3193ab
+        version: https://pkg.pr.new/@nuxthub/core@d3193ab(@cloudflare/sandbox@0.7.0)(@vercel/sandbox@1.4.1)(db0@0.3.4)(ioredis@5.9.2)(magicast@0.5.1)
       '@vercel/sandbox':
         specifier: ^1.0.0
         version: 1.4.1
@@ -481,8 +481,8 @@ packages:
       rolldown:
         optional: true
 
-  '@nuxthub/core@https://pkg.pr.new/@nuxthub/core@ac1561b':
-    resolution: {integrity: sha512-QortJQCI26fPGur+Nu4ToyacmZ8TUsVBzlVS9I1uZALlKxCAhKRKvLF6nilcJk0SkbtZiWnglHbtI9CaHJdkZA==, tarball: https://pkg.pr.new/@nuxthub/core@ac1561b}
+  '@nuxthub/core@https://pkg.pr.new/@nuxthub/core@d3193ab':
+    resolution: {integrity: sha512-e8gYV0Ehj1T9894ejIO+todgCeuhccJjVu0jQ5U3UJi7HWlVkjBE1db04uwjJkin4jYE5UWQbl1/nJw+XWHBrg==, tarball: https://pkg.pr.new/@nuxthub/core@d3193ab}
     version: 0.10.5
     hasBin: true
     peerDependencies:
@@ -4384,7 +4384,7 @@ snapshots:
       - vue-tsc
       - yaml
 
-  '@nuxthub/core@https://pkg.pr.new/@nuxthub/core@ac1561b(@cloudflare/sandbox@0.7.0)(@vercel/sandbox@1.4.1)(db0@0.3.4)(ioredis@5.9.2)(magicast@0.5.1)':
+  '@nuxthub/core@https://pkg.pr.new/@nuxthub/core@d3193ab(@cloudflare/sandbox@0.7.0)(@vercel/sandbox@1.4.1)(db0@0.3.4)(ioredis@5.9.2)(magicast@0.5.1)':
     dependencies:
       '@cloudflare/workers-types': 4.20260131.0
       '@nuxt/kit': 4.3.0(magicast@0.5.1)
