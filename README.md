@@ -111,5 +111,7 @@ Playground UX and feature coverage mirror the local reference at:
 
 ## Links
 
+- [Live (Vercel)](https://hub-sandbox-example-nuxt4.vercel.app)
+- [Live (Cloudflare)](https://onmax-hub-sandbox-example.maximogarciamtnez.workers.dev)
 - [NuxtHub](https://hub.nuxt.com)
 - [unagent](https://github.com/unjs/unagent)
