@@ -2,13 +2,6 @@
 
 Unified sandbox API for isolated code execution on Vercel and Cloudflare.
 
-## Requirements
-
-- Node.js + pnpm
-- Vercel CLI (`vercel login`)
-- Wrangler CLI (`wrangler login`)
-- Docker (required for Cloudflare Sandbox container build)
-
 ## Setup
 
 ```bash
@@ -72,17 +65,29 @@ export default defineNuxtConfig({
 also pass `namespace` to override the Durable Object binding (it is auto-injected
 when running on Workers).
 
+### Option Summary
+
+- `provider`: `vercel` or `cloudflare` (omit for auto-detect)
+- `runtime`: Vercel runtime (e.g. `node24`)
+- `timeout`: execution timeout (ms)
+- `cpu`: Vercel CPU allocation
+- `ports`: Vercel exposed ports
+- `sandboxId`: Cloudflare sandbox identifier
+- `cloudflare.sleepAfter`: idle timeout (seconds)
+- `cloudflare.keepAlive`: keep sandbox warm
+- `cloudflare.normalizeId`: normalize sandbox IDs
+
 ## Limitations and Notes
 
-- Provider availability depends on platform credentials and runtime. Use
-  `/api/health` and `/api/sandbox/features` to confirm support at runtime.
-- Vercel sandbox auth requires OIDC tokens for local development (`vercel link`
-  and `vercel env pull`).
-- Vercel sandbox defaults to a short timeout; longer runs depend on plan limits.
-- Cloudflare sandboxes run as Durable Objects and reset after idle (default
-  `sleepAfter` is 10 minutes unless overridden).
-- Cloudflare `normalizeId` can create new sandboxes if you previously used
-  mixed‑case IDs; use lowercase IDs or enable normalization consistently.
+### Vercel
+
+- Local development requires OIDC tokens (`vercel link` + `vercel env pull`).
+- Longer timeouts and CPU/port limits depend on your Vercel plan.
+
+### Cloudflare
+
+- Sandboxes run as Durable Objects and sleep after idle (`sleepAfter`).
+- `normalizeId` may change sandbox IDs if you previously used mixed-case IDs.
 
 ## API Endpoints
 
@@ -91,40 +96,6 @@ when running on Workers).
 - `GET /api/sandbox/features` — provider-specific checks
 - `GET /api/sandbox/stream` — streaming stdout/stderr
 - `GET /api/sandbox/process` — background process + log wait
-
-## Deploy (Production)
-
-### Vercel
-
-```bash
-vercel link
-pnpm build:vercel
-pnpm deploy:vercel:prod
-```
-
-If sandbox requests fail, ensure OIDC is enabled and tokens are pulled:
-
-```bash
-vercel env pull
-```
-
-### Cloudflare
-
-```bash
-# Docker must be running
-pnpm build:cloudflare
-pnpm deploy:cloudflare:prod
-```
-
-This repository is pinned to Cloudflare account:
-`ba6e044dfdaaffec3cac45e9feccd237`
-
-## Smoke Tests
-
-```bash
-BASE_URL=https://your-deploy.vercel.app pnpm smoke
-BASE_URL=https://your-worker.your-account.workers.dev pnpm smoke
-```
 
 ## Usage Example
 
