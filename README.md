@@ -1,18 +1,53 @@
 # NuxtHub Sandbox Example
 
-Minimal examples of using `hubSandbox()` for isolated code execution.
+Unified sandbox API for isolated code execution on Vercel and Cloudflare.
 
-## Branches
+## Setup
 
-- **cloudflare** - Cloudflare Workers with Containers
-- **vercel** - Vercel Sandbox
+```bash
+pnpm install
+```
 
-## Live Demos
+## Deploy
 
-- Cloudflare: https://hub-sandbox-test.maximogarciamtnez.workers.dev/api/sandbox
-- Vercel: https://sandbox-test-beryl.vercel.app/api/sandbox
+**Vercel:**
+```bash
+pnpm deploy:vercel
+```
+
+**Cloudflare:**
+```bash
+# Docker must be running
+pnpm deploy:cloudflare
+```
+
+## Usage
+
+```ts
+// server/api/sandbox.get.ts
+export default defineEventHandler(async (event) => {
+  const env = event.context.cloudflare?.env
+  const sandbox = await hubSandbox({ namespace: env?.SANDBOX })
+
+  const result = await sandbox.exec('echo', ['hello'])
+  await sandbox.writeFile('/tmp/test.txt', 'content')
+  const content = await sandbox.readFile('/tmp/test.txt')
+  await sandbox.stop()
+
+  return { result, content }
+})
+```
+
+## Response
+
+```json
+{
+  "exec": { "ok": true, "stdout": "Hello from sandbox!", "stderr": "", "code": 0 },
+  "fileContent": "NuxtHub Sandbox works!"
+}
+```
 
 ## Links
 
-- [NuxtHub Docs](https://hub.nuxt.com)
+- [NuxtHub](https://hub.nuxt.com)
 - [unagent](https://github.com/unjs/unagent)

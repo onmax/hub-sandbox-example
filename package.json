@@ -1,0 +1,17 @@
+{
+  "name": "hub-sandbox-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "deploy:vercel": "vercel",
+    "deploy:cloudflare": "nuxt build && npx wrangler --cwd .output deploy"
+  },
+  "dependencies": {
+    "nuxt": "^3.14.0",
+    "@nuxthub/core": "link:../../nuxt/hub",
+    "@cloudflare/sandbox": "^0.7.0",
+    "@vercel/sandbox": "^1.0.0"
+  }
+}
