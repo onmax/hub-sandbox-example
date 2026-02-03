@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 
 type LogEntry = {
   time: string
@@ -44,7 +44,7 @@ function format(value: unknown) {
 
 async function callEndpoint(path: string) {
   const time = new Date().toLocaleTimeString()
-  const entry: LogEntry = { time, endpoint: path, status: 'loading' }
+  const entry = reactive<LogEntry>({ time, endpoint: path, status: 'loading' })
   logs.value = [entry, ...logs.value]
   loading.value[path] = true
 
