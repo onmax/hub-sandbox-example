@@ -19,5 +19,10 @@
     "@vercel/sandbox": "^1.0.0",
     "unagent": "^0.0.5",
     "tailwindcss": "^4.1.16"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@nuxthub/core@0.10.5": "patches/@nuxthub__core@0.10.5.patch"
+    }
   }
 }
