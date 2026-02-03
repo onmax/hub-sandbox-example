@@ -5,15 +5,26 @@ export default defineEventHandler(async () => {
   try {
     const sandbox = await hubSandbox()
     try {
-      const exec = await sandbox.exec('echo', ['Hello from sandbox!'])
-      await sandbox.writeFile('/tmp/test.txt', 'NuxtHub Sandbox works!')
-      const content = await sandbox.readFile('/tmp/test.txt')
+      const stdoutChunks: string[] = []
+      const stderrChunks: string[] = []
+
+      const exec = await sandbox.exec(
+        'sh',
+        ['-c', 'echo "line 1"; echo "line 2"; echo "error" 1>&2; echo "line 3"'],
+        {
+          onStdout: (data) => { stdoutChunks.push(data) },
+          onStderr: (data) => { stderrChunks.push(data) },
+        },
+      )
 
       return {
         ok: true,
         provider: sandbox.provider,
-        exec,
-        fileContent: content,
+        streaming: {
+          exec,
+          stdoutChunks,
+          stderrChunks,
+        },
         elapsedMs: Date.now() - start,
         timestamp: new Date().toISOString(),
       }

@@ -5,14 +5,19 @@
   "scripts": {
     "dev": "nuxt dev",
     "build": "nuxt build",
-    "deploy:vercel": "vercel",
-    "deploy:cloudflare": "nuxt build && npx wrangler --cwd .output deploy"
+    "build:vercel": "NITRO_PRESET=vercel nuxt build",
+    "build:cloudflare": "NITRO_PRESET=cloudflare_module nuxt build",
+    "deploy:vercel:prod": "vercel deploy --prebuilt --prod",
+    "deploy:cloudflare:prod": "CLOUDFLARE_ACCOUNT_ID=ba6e044dfdaaffec3cac45e9feccd237 npx wrangler --cwd .output deploy",
+    "smoke": "bash ./scripts/smoke.sh"
   },
   "dependencies": {
-    "nuxt": "^3.14.0",
+    "nuxt": "^4.3.0",
+    "@nuxt/ui": "^4.4.0",
     "@nuxthub/core": "https://pkg.pr.new/@nuxthub/core@d3193ab",
     "@cloudflare/sandbox": "^0.7.0",
     "@vercel/sandbox": "^1.0.0",
-    "unagent": "https://pkg.pr.new/onmax/unagent@1c545eb"
+    "unagent": "^0.0.5",
+    "tailwindcss": "^4.1.16"
   }
 }

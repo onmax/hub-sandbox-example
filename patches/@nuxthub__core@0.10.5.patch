@@ -1,0 +1,222 @@
+diff --git a/dist/module.d.mts b/dist/module.d.mts
+index 601d2380695174ae0831fcdde7f7b81dcc1dd99d..8c3485edc4943fea643fb572f4eb83948f2898e1 100644
+--- a/dist/module.d.mts
++++ b/dist/module.d.mts
+@@ -287,6 +287,22 @@ type SandboxConfig = {
+      * CPU allocation.
+      */
+     cpu?: number;
++    /**
++     * Ports to expose (Vercel only).
++     */
++    ports?: number[];
++    /**
++     * Custom sandbox ID (Cloudflare only).
++     */
++    sandboxId?: string;
++    /**
++     * Cloudflare sandbox options.
++     */
++    cloudflare?: {
++        sleepAfter?: string | number;
++        keepAlive?: boolean;
++        normalizeId?: boolean;
++    };
+ };
+ type ResolvedSandboxConfig = SandboxConfig & {
+     provider: 'vercel' | 'cloudflare';
+@@ -295,6 +311,8 @@ type ResolvedSandboxConfig = SandboxConfig & {
+ interface HubSandboxOptions {
+     /** Durable Object namespace binding (auto-injected from event context) */
+     namespace?: unknown;
++    /** Override provider at runtime */
++    provider?: 'vercel' | 'cloudflare';
+     /** Custom sandbox ID */
+     sandboxId?: string;
+     /** Runtime (Vercel only) */
+@@ -303,13 +321,21 @@ interface HubSandboxOptions {
+     timeout?: number;
+     /** CPU allocation (Vercel only) */
+     cpu?: number;
++    /** Ports to expose (Vercel only) */
++    ports?: number[];
++    /** Cloudflare sandbox options */
++    cloudflare?: {
++        sleepAfter?: string | number;
++        keepAlive?: boolean;
++        normalizeId?: boolean;
++    };
+ }
+ /** Create a sandbox instance for running isolated code */
+ declare function hubSandbox(options?: HubSandboxOptions): Promise<unagent_sandbox.Sandbox>;
+ /** Check if a sandbox provider SDK is available */
+-declare function isSandboxAvailable(): boolean;
++declare function isSandboxAvailable(provider: 'vercel' | 'cloudflare'): boolean;
+ /** Detect current sandbox environment */
+-declare function detectSandbox(): unagent_sandbox.SandboxDetection;
++declare function detectSandbox(): unagent_sandbox.SandboxDetectionResult;
+ 
+ declare const _default: NuxtModule<ModuleOptions$1>;
+ 
+diff --git a/dist/module.mjs b/dist/module.mjs
+index 10877ae4b05d91cc9de759f30a86dcf6be79d023..17fb66c3d33847e159514c9ce93862a696831317 100644
+--- a/dist/module.mjs
++++ b/dist/module.mjs
+@@ -900,50 +900,92 @@ function resolveSandboxConfig(hub) {
+   return defu(userConfig, { provider: "vercel", runtime: "node24" });
+ }
+ function generateSandboxCode(config) {
+-  if (config.provider === "cloudflare") {
+-    return `import { getSandbox } from '@cloudflare/sandbox'
+-import { useEvent } from 'nitropack/runtime'
+-export { detectSandbox, isSandboxAvailable } from 'unagent/sandbox'
++  const cloudflareImport = config.provider === "cloudflare" ? "import { getSandbox } from '@cloudflare/sandbox'\n" : "";
++  const cloudflareGetSandbox = config.provider === "cloudflare" ? "getSandbox" : "undefined";
++  return `import { createSandbox, detectSandbox, isSandboxAvailable } from 'unagent/sandbox'
++${cloudflareImport}import { useEvent } from 'nitropack/runtime'
++export { detectSandbox, isSandboxAvailable }
++
++const config = ${JSON.stringify(config)}
++const defaultGetSandbox = ${cloudflareGetSandbox}
+ 
+-function shellQuote(arg) {
+-  if (!/[^\\w\\-./=]/.test(arg)) return arg
+-  return "'" + arg.replace(/'/g, "'\\\\''") + "'"
++function parseBoolean(value) {
++  if (!value) return undefined
++  if (value === 'true' || value === '1') return true
++  if (value === 'false' || value === '0') return false
++  return undefined
+ }
+ 
+-class CloudflareSandbox {
+-  constructor(id, instance) {
+-    this.id = id
+-    this.provider = 'cloudflare'
+-    this.instance = instance
+-  }
+-  async exec(command, args) {
+-    const cmd = shellQuote(command) + ' ' + args.map(shellQuote).join(' ')
+-    const result = await this.instance.exec(cmd)
+-    return { ok: result.success, stdout: result.stdout, stderr: result.stderr, code: result.exitCode }
+-  }
+-  async writeFile(path, content) { await this.instance.writeFile(path, content) }
+-  async readFile(path) { return (await this.instance.readFile(path)).content }
+-  async stop() { await this.instance.destroy() }
++function parseNumber(value) {
++  if (!value) return undefined
++  const num = Number(value)
++  return Number.isFinite(num) ? num : undefined
+ }
+ 
+-export async function hubSandbox(options = {}) {
+-  const namespace = options.namespace ?? useEvent().context.cloudflare?.env?.SANDBOX
+-  if (!namespace) {
+-    throw new Error('Cloudflare sandbox requires SANDBOX binding. Ensure hub.sandbox is enabled and you are running on Cloudflare.')
+-  }
+-  const id = options.sandboxId ?? 'sandbox-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8)
+-  return new CloudflareSandbox(id, getSandbox(namespace, id))
++function parsePorts(value) {
++  if (!value) return undefined
++  const ports = value.split(',').map(p => Number(p.trim())).filter(p => Number.isFinite(p))
++  return ports.length ? ports : undefined
+ }
+-`;
+-  }
+-  return `import { createSandbox, detectSandbox, isSandboxAvailable } from 'unagent/sandbox'
+-export { detectSandbox, isSandboxAvailable }
+ 
+-const config = ${JSON.stringify(config)}
++function parseEnvConfig() {
++  const env = typeof process !== 'undefined' ? process.env : {}
++  const providerRaw = env.NUXT_HUB_SANDBOX_PROVIDER?.toLowerCase()
++  const provider = providerRaw === 'vercel' || providerRaw === 'cloudflare' ? providerRaw : undefined
++  const runtime = env.NUXT_HUB_SANDBOX_RUNTIME
++  const timeout = parseNumber(env.NUXT_HUB_SANDBOX_TIMEOUT)
++  const cpu = parseNumber(env.NUXT_HUB_SANDBOX_CPU)
++  const ports = parsePorts(env.NUXT_HUB_SANDBOX_PORTS)
++  const sandboxId = env.NUXT_HUB_SANDBOX_ID
++
++  const sleepAfter = env.NUXT_HUB_SANDBOX_CF_SLEEP_AFTER
++  const keepAlive = parseBoolean(env.NUXT_HUB_SANDBOX_CF_KEEP_ALIVE)
++  const normalizeId = parseBoolean(env.NUXT_HUB_SANDBOX_CF_NORMALIZE_ID)
++  const cloudflare = sleepAfter || keepAlive !== undefined || normalizeId !== undefined
++    ? {
++        sleepAfter: sleepAfter ? (Number.isFinite(Number(sleepAfter)) ? Number(sleepAfter) : sleepAfter) : undefined,
++        keepAlive,
++        normalizeId,
++      }
++    : undefined
++
++  return { provider, runtime, timeout, cpu, ports, sandboxId, cloudflare }
++}
++
++function resolveOptions(options) {
++  const envConfig = parseEnvConfig()
++  return { ...config, ...envConfig, ...options }
++}
+ 
+ export async function hubSandbox(options = {}) {
+-  const opts = { ...config, ...options }
+-  return createSandbox({ provider: 'vercel', runtime: opts.runtime, timeout: opts.timeout, cpu: opts.cpu })
++  const opts = resolveOptions(options)
++  const provider = opts.provider || config.provider
++
++  if (provider === 'cloudflare') {
++    const namespace = opts.namespace ?? useEvent().context.cloudflare?.env?.SANDBOX
++    if (!namespace) {
++      throw new Error('Cloudflare sandbox requires SANDBOX binding. Ensure hub.sandbox is enabled and you are running on Cloudflare.')
++    }
++    return createSandbox({
++      provider: {
++        name: 'cloudflare',
++        namespace,
++        sandboxId: opts.sandboxId,
++        cloudflare: opts.cloudflare,
++        getSandbox: opts.getSandbox ?? defaultGetSandbox,
++      },
++    })
++  }
++
++  return createSandbox({
++    provider: {
++      name: 'vercel',
++      runtime: opts.runtime,
++      timeout: opts.timeout,
++      cpu: opts.cpu,
++      ports: opts.ports,
++    },
++  })
+ }
+ `;
+ }
+@@ -961,7 +1003,7 @@ async function setupSandbox(nuxt, hub, deps) {
+   }
+   if (sandboxConfig.provider === "cloudflare" && !nuxt.options.dev) {
+     nuxt.hook("nitro:init", (nitro) => {
+-      const cfExternals = ["cloudflare:workers", "cloudflare:sockets", "@cloudflare/sandbox"];
++      const cfExternals = ["cloudflare:workers", "cloudflare:sockets"];
+       const existing = nitro.options.rollupConfig?.external;
+       if (Array.isArray(existing)) {
+         existing.push(...cfExternals);
+diff --git a/dist/sandbox/runtime/useSandbox.d.ts b/dist/sandbox/runtime/useSandbox.d.ts
+index 1a556ac6d701ec3bbe3d3f09b89ecab94fc0c190..78486288c885572bf2d3673b2047708e18ea3598 100644
+--- a/dist/sandbox/runtime/useSandbox.d.ts
++++ b/dist/sandbox/runtime/useSandbox.d.ts
+@@ -1,2 +1,2 @@
+ // Sandbox types are now exported from @nuxthub/core via unagent/sandbox
+-export type { Sandbox, SandboxOptions, SandboxExecResult, SandboxProvider, SandboxDetection, HubSandboxOptions, hubSandbox, isSandboxAvailable, detectSandbox } from '@nuxthub/core'
++export type { Sandbox, SandboxOptions, SandboxExecResult, SandboxProvider, SandboxDetectionResult, HubSandboxOptions, hubSandbox, isSandboxAvailable, detectSandbox } from '@nuxthub/core'
+diff --git a/dist/types.d.mts b/dist/types.d.mts
+index 85eab7ac0883c3b371e508f922755e832b4c1268..ae3fa6063b60c6021dff5787a402d1c16a2aa22b 100644
+--- a/dist/types.d.mts
++++ b/dist/types.d.mts
+@@ -5,7 +5,7 @@ declare module '@nuxt/schema' {
+   interface RuntimeConfig extends ModuleRuntimeConfig {}
+ }
+ 
+-export { type Sandbox, type SandboxDetection, type SandboxExecResult, type SandboxOptions, type SandboxProvider } from 'unagent/sandbox'
++export { type Sandbox, type SandboxDetectionResult, type SandboxExecResult, type SandboxOptions, type SandboxProvider } from 'unagent/sandbox'
+ 
+ export { default, type detectSandbox, type hubSandbox, type isSandboxAvailable } from './module.mjs'
+ 
