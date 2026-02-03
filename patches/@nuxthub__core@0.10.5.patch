@@ -59,10 +59,10 @@ index 601d2380695174ae0831fcdde7f7b81dcc1dd99d..8c3485edc4943fea643fb572f4eb8394
  declare const _default: NuxtModule<ModuleOptions$1>;
  
 diff --git a/dist/module.mjs b/dist/module.mjs
-index 10877ae4b05d91cc9de759f30a86dcf6be79d023..17fb66c3d33847e159514c9ce93862a696831317 100644
+index 10877ae4b05d91cc9de759f30a86dcf6be79d023..42637b19c4ffbc1cf285512a1ec1c74fa82850da 100644
 --- a/dist/module.mjs
 +++ b/dist/module.mjs
-@@ -900,50 +900,92 @@ function resolveSandboxConfig(hub) {
+@@ -900,50 +900,99 @@ function resolveSandboxConfig(hub) {
    return defu(userConfig, { provider: "vercel", runtime: "node24" });
  }
  function generateSandboxCode(config) {
@@ -178,6 +178,13 @@ index 10877ae4b05d91cc9de759f30a86dcf6be79d023..17fb66c3d33847e159514c9ce93862a6
 +    })
 +  }
 +
++  const event = useEvent()
++  const headerToken = event?.node?.req?.headers?.['x-vercel-oidc-token']
++  const oidcToken = Array.isArray(headerToken) ? headerToken[0] : headerToken
++  if (oidcToken && (!process.env.VERCEL_OIDC_TOKEN || process.env.VERCEL_OIDC_TOKEN !== oidcToken)) {
++    process.env.VERCEL_OIDC_TOKEN = oidcToken
++  }
++
 +  return createSandbox({
 +    provider: {
 +      name: 'vercel',
@@ -190,7 +197,7 @@ index 10877ae4b05d91cc9de759f30a86dcf6be79d023..17fb66c3d33847e159514c9ce93862a6
  }
  `;
  }
-@@ -961,7 +1003,7 @@ async function setupSandbox(nuxt, hub, deps) {
+@@ -961,7 +1010,7 @@ async function setupSandbox(nuxt, hub, deps) {
    }
    if (sandboxConfig.provider === "cloudflare" && !nuxt.options.dev) {
      nuxt.hook("nitro:init", (nitro) => {
